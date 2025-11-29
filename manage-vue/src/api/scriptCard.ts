@@ -15,6 +15,15 @@ export interface ScriptCard {
   createBy?: string
   updateBy?: string
   remark?: string
+  gameIds?: string[]
+}
+
+export interface ScriptGame {
+  id: string
+  title: string
+  remark?: string
+  createTime?: string
+  updateTime?: string
 }
 
 export interface PageParams {
@@ -84,6 +93,16 @@ export function batchDeleteScriptCard(ids: string[]) {
 export function getScriptCardDetail(id: string) {
   return request({
     url: `/script/card/detail/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取游戏列表（用于卡密关联游戏选择）
+ */
+export function getGameList() {
+  return request({
+    url: '/script/card/gameList',
     method: 'get'
   })
 }

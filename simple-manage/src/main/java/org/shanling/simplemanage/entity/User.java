@@ -3,7 +3,7 @@ package org.shanling.simplemanage.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 用户实体类 - 管理端用户表
@@ -43,7 +43,7 @@ public class User {
     /**
      * 最后登录时间
      */
-    private LocalDateTime lastLoginTime;
+    private Date lastLoginTime;
 
     /**
      * 最后登录IP
@@ -54,13 +54,13 @@ public class User {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    private Date createTime;
 
     /**
      * 更新时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+    private Date updateTime;
 
     /**
      * 创建人

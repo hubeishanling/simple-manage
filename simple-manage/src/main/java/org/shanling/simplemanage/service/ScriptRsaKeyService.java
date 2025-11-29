@@ -20,9 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,8 +92,8 @@ public class ScriptRsaKeyService {
             clearDefaultKey(null);
         }
         
-        rsaKey.setCreateTime(LocalDateTime.now());
-        rsaKey.setUpdateTime(LocalDateTime.now());
+        rsaKey.setCreateTime(new Date());
+        rsaKey.setUpdateTime(new Date());
         
         rsaKeyMapper.insert(rsaKey);
         log.info("RSA密钥添加成功：{}", rsaKey.getKeyName());
@@ -118,7 +118,7 @@ public class ScriptRsaKeyService {
             clearDefaultKey(rsaKey.getId());
         }
         
-        rsaKey.setUpdateTime(LocalDateTime.now());
+        rsaKey.setUpdateTime(new Date());
         
         rsaKeyMapper.updateById(rsaKey);
         log.info("RSA密钥更新成功：{}", rsaKey.getKeyName());
@@ -181,7 +181,7 @@ public class ScriptRsaKeyService {
         
         // 设置当前为默认
         rsaKey.setIsDefault(1);
-        rsaKey.setUpdateTime(LocalDateTime.now());
+        rsaKey.setUpdateTime(new Date());
         rsaKeyMapper.updateById(rsaKey);
         
         log.info("设置默认密钥成功：{}", rsaKey.getKeyName());
@@ -266,7 +266,7 @@ public class ScriptRsaKeyService {
         
         rsaKeyMapper.selectList(wrapper).forEach(key -> {
             key.setIsDefault(0);
-            key.setUpdateTime(LocalDateTime.now());
+            key.setUpdateTime(new Date());
             rsaKeyMapper.updateById(key);
         });
     }
@@ -293,8 +293,8 @@ public class ScriptRsaKeyService {
             rsaKey.setStatus(0); // 正常状态
             rsaKey.setIsDefault(1); // 设为默认
             rsaKey.setRemark("系统自动生成的默认密钥");
-            rsaKey.setCreateTime(LocalDateTime.now());
-            rsaKey.setUpdateTime(LocalDateTime.now());
+            rsaKey.setCreateTime(new Date());
+            rsaKey.setUpdateTime(new Date());
             
             rsaKeyMapper.insert(rsaKey);
             

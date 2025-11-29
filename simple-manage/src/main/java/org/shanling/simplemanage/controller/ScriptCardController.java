@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.shanling.simplemanage.common.Result;
 import org.shanling.simplemanage.dto.ScriptCardDTO;
 import org.shanling.simplemanage.entity.ScriptCard;
+import org.shanling.simplemanage.entity.ScriptGame;
 import org.shanling.simplemanage.service.ScriptCardService;
+import org.shanling.simplemanage.service.ScriptGameService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +24,12 @@ import java.util.List;
 public class ScriptCardController {
 
     private final ScriptCardService scriptCardService;
+    private final ScriptGameService scriptGameService;
 
-    public ScriptCardController(ScriptCardService scriptCardService) {
+    public ScriptCardController(ScriptCardService scriptCardService,
+                                 ScriptGameService scriptGameService) {
         this.scriptCardService = scriptCardService;
+        this.scriptGameService = scriptGameService;
     }
 
     /**
@@ -89,6 +94,16 @@ public class ScriptCardController {
         log.info("批量删除卡密：ids={}", ids);
         scriptCardService.batchDeleteCard(ids);
         return Result.success("批量删除成功", null);
+    }
+
+    /**
+     * 获取游戏列表（用于卡密关联游戏选择）
+     */
+    @GetMapping("/gameList")
+    public Result<List<ScriptGame>> getGameList() {
+        log.info("获取游戏列表");
+        List<ScriptGame> gameList = scriptGameService.getAllGames();
+        return Result.success(gameList);
     }
 
 }

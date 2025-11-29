@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * 卡密关联设备管理服务
@@ -89,8 +89,8 @@ public class ScriptCardDeviceService {
         ScriptCardDevice device = new ScriptCardDevice();
         BeanUtils.copyProperties(deviceDTO, device);
         
-        device.setCreateTime(LocalDateTime.now());
-        device.setUpdateTime(LocalDateTime.now());
+        device.setCreateTime(new Date());
+        device.setUpdateTime(new Date());
         
         scriptCardDeviceMapper.insert(device);
         log.info("设备绑定成功：cardNo={}, deviceAndroidId={}", device.getCardNo(), device.getDeviceAndroidId());
@@ -118,8 +118,20 @@ public class ScriptCardDeviceService {
     @Transactional(rollbackFor = Exception.class)
     public void batchDeleteDevice(Collection<String> ids) {
         log.info("批量删除设备绑定：ids={}", ids);
-        scriptCardDeviceMapper.deleteBatchIds(ids);
+        scriptCardDeviceMapper.deleteByIds(ids);
         log.info("批量删除设备绑定成功");
+    }
+
+    /**
+     * 统计卡密绑定的设备数量
+     */
+    public long countBoundDevices(String cardNo) {
+        log.info("统计设备绑定数量：cardNo={}", cardNo);
+        
+        LambdaQueryWrapper<ScriptCardDevice> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ScriptCardDevice::getCardNo, cardNo);
+        
+        return scriptCardDeviceMapper.selectCount(wrapper);
     }
 
     /**
@@ -130,15 +142,6 @@ public class ScriptCardDeviceService {
         wrapper.eq(ScriptCardDevice::getCardNo, cardNo);
         wrapper.eq(ScriptCardDevice::getDeviceAndroidId, deviceAndroidId);
         return scriptCardDeviceMapper.selectCount(wrapper) > 0;
-    }
-
-    /**
-     * 统计卡密已绑定的设备数量
-     */
-    public long countBoundDevices(String cardNo) {
-        LambdaQueryWrapper<ScriptCardDevice> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(ScriptCardDevice::getCardNo, cardNo);
-        return scriptCardDeviceMapper.selectCount(wrapper);
     }
 
 }

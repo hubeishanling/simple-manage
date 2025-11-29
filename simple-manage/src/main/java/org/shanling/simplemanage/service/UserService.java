@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 用户管理服务
@@ -89,8 +89,8 @@ public class UserService {
         
         // 加密密码
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setCreateTime(LocalDateTime.now());
-        user.setUpdateTime(LocalDateTime.now());
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
         
         userMapper.insert(user);
         log.info("用户添加成功：{}", user.getUsername());
@@ -119,7 +119,7 @@ public class UserService {
             user.setRemark(userDTO.getRemark());
         }
         
-        user.setUpdateTime(LocalDateTime.now());
+        user.setUpdateTime(new Date());
         
         userMapper.updateById(user);
         log.info("用户更新成功：{}", user.getUsername());

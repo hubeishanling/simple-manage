@@ -67,6 +67,19 @@
         </el-table-column>
         <el-table-column prop="loginIp" label="最后登录IP" width="150" />
         <el-table-column prop="loginDate" label="最后登录时间" width="180" />
+        <el-table-column label="关联游戏" width="150">
+          <template #default="{ row }">
+            <el-tag 
+              v-for="game in (row.cardGames || [])"
+              :key="game.gameId" 
+              size="small" 
+              class="mr-1"
+            >
+              {{ game.gameTitle }}
+            </el-tag>
+            <span v-if="!row.cardGames || row.cardGames.length === 0">-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column prop="remark" label="备注" show-overflow-tooltip min-width="150" />
         <el-table-column label="操作" width="180" fixed="right">
@@ -162,6 +175,21 @@
             <el-radio :label="0">停用</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="关联游戏" prop="gameIds">
+          <el-select 
+            v-model="formData.gameIds" 
+            multiple 
+            placeholder="请选择关联的游戏" 
+            style="width: 100%"
+          >
+            <el-option
+              v-for="game in gameList"
+              :key="game.id"
+              :label="game.title"
+              :value="game.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="备注">
           <el-input
             v-model="formData.remark"
@@ -185,17 +213,21 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import { Search, Refresh, Plus, Edit, Delete } from '@element-plus/icons-vue'
 import {
   getScriptCardList,
+  getScriptCardDetail,
   addScriptCard,
   updateScriptCard,
   deleteScriptCard,
   batchDeleteScriptCard,
+  getGameList,
   type ScriptCard,
+  type ScriptGame,
   type PageParams
 } from '@/api/scriptCard'
 
 const loading = ref(false)
 const tableData = ref<ScriptCard[]>([])
 const selectedIds = ref<string[]>([])
+const gameList = ref<ScriptGame[]>([])
 
 const searchForm = reactive({
   cardNo: '',
@@ -221,7 +253,8 @@ const formData = reactive<ScriptCard>({
   expireTime: undefined,
   deviceSize: 1,
   status: 1,
-  remark: ''
+  remark: '',
+  gameIds: []
 })
 
 const formRules: FormRules = {
@@ -236,12 +269,28 @@ const formRules: FormRules = {
   ],
   status: [
     { required: true, message: '请选择状态', trigger: 'change' }
+  ],
+  gameIds: [
+    { required: true, message: '请至少选择一个关联游戏', trigger: 'change' }
   ]
 }
 
 onMounted(() => {
   loadData()
+  loadGameList()
 })
+
+/** 加载游戏列表 */
+const loadGameList = async () => {
+  try {
+    const res: any = await getGameList()
+    if (res.code === 200) {
+      gameList.value = res.data
+    }
+  } catch (error) {
+    console.error('加载游戏列表失败：', error)
+  }
+}
 
 const loadData = async () => {
   loading.value = true
@@ -294,10 +343,28 @@ const handleAdd = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = (row: ScriptCard) => {
+const handleEdit = async (row: ScriptCard) => {
   dialogTitle.value = '编辑卡密'
   isEdit.value = true
-  Object.assign(formData, row)
+  
+  // 调用后端接口获取完整数据（包括关联的游戏）
+  try {
+    const res: any = await getScriptCardDetail(row.id!)
+    if (res.code === 200) {
+      Object.assign(formData, res.data)
+      // 设置关联的游戏ID列表
+      if (res.data.cardGames && res.data.cardGames.length > 0) {
+        formData.gameIds = res.data.cardGames.map((item: any) => item.gameId)
+      } else {
+        formData.gameIds = []
+      }
+    }
+  } catch (error) {
+    console.error('获取卡密详情失败：', error)
+    ElMessage.error('获取卡密详情失败')
+    return
+  }
+  
   dialogVisible.value = true
 }
 
@@ -376,7 +443,8 @@ const handleDialogClose = () => {
     expireTime: undefined,
     deviceSize: 1,
     status: 1,
-    remark: ''
+    remark: '',
+    gameIds: []
   })
 }
 

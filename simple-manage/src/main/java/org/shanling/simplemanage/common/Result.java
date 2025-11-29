@@ -88,6 +88,13 @@ public class Result<T> implements Serializable {
     }
 
     /**
+     * 失败返回（自定义消息和数据）
+     */
+    public static <T> Result<T> error(String message, T data) {
+        return new Result<>(500, message, data);
+    }
+
+    /**
      * 自定义返回
      */
     public static <T> Result<T> build(Integer code, String message, T data) {

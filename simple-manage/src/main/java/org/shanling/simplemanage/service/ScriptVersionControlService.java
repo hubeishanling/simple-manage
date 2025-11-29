@@ -23,9 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -118,8 +117,8 @@ public class ScriptVersionControlService {
             versionControl.setFileMd5(fileMd5);
             versionControl.setFileSize(fileSize);
             versionControl.setRemark(remark);
-            versionControl.setCreateTime(LocalDateTime.now());
-            versionControl.setUpdateTime(LocalDateTime.now());
+            versionControl.setCreateTime(new Date());
+            versionControl.setUpdateTime(new Date());
             
             versionControlMapper.insert(versionControl);
             log.info("脚本文件上传成功：gameId={}, version={}", gameId, newVersion);
@@ -168,7 +167,7 @@ public class ScriptVersionControlService {
                 existingRecord.setRemark(remark);
             }
             existingRecord.setGameId(gameId);
-            existingRecord.setUpdateTime(LocalDateTime.now());
+            existingRecord.setUpdateTime(new Date());
             
             versionControlMapper.updateById(existingRecord);
             log.info("脚本文件更新成功：id={}", id);
@@ -192,7 +191,7 @@ public class ScriptVersionControlService {
         if (StringUtils.hasText(versionDTO.getRemark())) {
             version.setRemark(versionDTO.getRemark());
         }
-        version.setUpdateTime(LocalDateTime.now());
+        version.setUpdateTime(new Date());
         
         versionControlMapper.updateById(version);
         log.info("版本信息更新成功：id={}", versionDTO.getId());
@@ -234,46 +233,8 @@ public class ScriptVersionControlService {
         }
         
         // 删除数据库记录
-        versionControlMapper.deleteBatchIds(ids);
+        versionControlMapper.deleteByIds(ids);
         log.info("批量删除版本成功");
-    }
-
-    /**
-     * 获取指定游戏的版本历史
-     */
-    public List<ScriptVersionControl> getVersionHistory(String gameId) {
-        log.info("查询版本历史：gameId={}", gameId);
-        LambdaQueryWrapper<ScriptVersionControl> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(ScriptVersionControl::getGameId, gameId);
-        wrapper.orderByDesc(ScriptVersionControl::getVersion);
-        return versionControlMapper.selectList(wrapper);
-    }
-
-    /**
-     * 保存文件到本地
-     */
-    private String saveFileToLocal(MultipartFile file, String gameId) throws IOException {
-        // 创建日期文件夹
-        String dateFolder = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String targetDir = uploadPath + File.separator + gameId + File.separator + dateFolder;
-        
-        // 确保目录存在
-        File dir = new File(targetDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        
-        // 生成文件名：时间戳 + 原始文件名
-        String originalFilename = file.getOriginalFilename();
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String filename = timestamp + "_" + originalFilename;
-        
-        // 保存文件
-        Path filePath = Paths.get(targetDir, filename);
-        Files.write(filePath, file.getBytes());
-        
-        // 返回URL
-        return urlPrefix + "/" + gameId + "/" + dateFolder + "/" + filename;
     }
 
     /**
@@ -314,6 +275,68 @@ public class ScriptVersionControlService {
         } catch (Exception e) {
             throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "计算MD5失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 获取游戏的版本历史记录
+     */
+    public List<ScriptVersionControl> getVersionHistory(String gameId) {
+        log.info("获取版本历史记录：gameId={}", gameId);
+        
+        LambdaQueryWrapper<ScriptVersionControl> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ScriptVersionControl::getGameId, gameId);
+        wrapper.orderByDesc(ScriptVersionControl::getVersion);
+        
+        return versionControlMapper.selectList(wrapper);
+    }
+
+    /**
+     * 根据游戏ID获取最新版本
+     * 用于脚本端获取最新可用版本
+     */
+    public ScriptVersionControl getLatestVersionByGameId(String gameId) {
+        log.info("获取最新版本：gameId={}", gameId);
+        
+        LambdaQueryWrapper<ScriptVersionControl> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ScriptVersionControl::getGameId, gameId);
+        wrapper.orderByDesc(ScriptVersionControl::getVersion);
+        wrapper.last("LIMIT 1");
+        
+        ScriptVersionControl version = versionControlMapper.selectOne(wrapper);
+        if (version == null) {
+            log.warn("未找到游戏的版本记录：gameId={}", gameId);
+        }
+        
+        return version;
+    }
+
+    /**
+     * 保存文件到本地
+     */
+    private String saveFileToLocal(MultipartFile file, String gameId) throws IOException {
+        // 生成日期文件夹（年月日）
+        String dateFolder = new java.text.SimpleDateFormat("yyyyMMdd").format(new Date());
+        
+        // 目标目录：uploadPath/gameId/日期/
+        String targetDir = uploadPath + File.separator + gameId + File.separator + dateFolder;
+        
+        // 确保目录存在
+        File dir = new File(targetDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        
+        // 生成文件名：时间戳 + 原始文件名
+        String originalFilename = file.getOriginalFilename();
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String filename = timestamp + "_" + originalFilename;
+        
+        // 保存文件
+        Path filePath = Paths.get(targetDir, filename);
+        Files.write(filePath, file.getBytes());
+        
+        // 返回URL
+        return urlPrefix + "/" + gameId + "/" + dateFolder + "/" + filename;
     }
 
 }

@@ -9,7 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 数据初始化器 - 启动时自动创建管理员账号
@@ -55,8 +55,8 @@ public class DataInitializer implements ApplicationRunner {
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setEmail("admin@example.com");
         admin.setStatus(1);
-        admin.setCreateTime(LocalDateTime.now());
-        admin.setUpdateTime(LocalDateTime.now());
+        admin.setCreateTime(new Date());
+        admin.setUpdateTime(new Date());
         admin.setCreateBy("system");
         admin.setRemark("系统默认管理员账号（username=admin 时不可删除）");
 

@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 认证服务
@@ -72,7 +72,7 @@ public class AuthService {
 
         // 更新登录信息
         String ip = IpUtil.getIpAddress(httpRequest);
-        user.setLastLoginTime(LocalDateTime.now());
+        user.setLastLoginTime(new Date());
         user.setLastLoginIp(ip);
         userMapper.updateById(user);
 

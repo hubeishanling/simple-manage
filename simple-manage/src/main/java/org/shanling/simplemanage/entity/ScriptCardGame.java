@@ -6,29 +6,34 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 游戏列表实体类
+ * 脚本卡密游戏关联实体类
  * 
  * @author shanling
  */
 @Data
-@TableName("script_game")
-public class ScriptGame {
+@TableName("script_card_game")
+public class ScriptCardGame {
 
     /**
-     * 游戏ID（主键，雪花算法生成）
+     * 主键ID（雪花算法生成）
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
 
     /**
-     * 游戏名称
+     * 卡密ID
      */
-    private String title;
+    private String cardId;
 
     /**
-     * 备注
+     * 游戏ID
      */
-    private String remark;
+    private String gameId;
+
+    /**
+     * 游戏名称（冗余字段）
+     */
+    private String gameTitle;
 
     /**
      * 创建时间
@@ -41,15 +46,5 @@ public class ScriptGame {
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
-
-    /**
-     * 创建人
-     */
-    private String createBy;
-
-    /**
-     * 更新人
-     */
-    private String updateBy;
 
 }

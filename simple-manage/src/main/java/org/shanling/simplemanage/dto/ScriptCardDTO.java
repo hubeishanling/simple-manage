@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 脚本卡密数据传输对象
@@ -52,5 +53,10 @@ public class ScriptCardDTO {
      * 备注
      */
     private String remark;
+
+    /**
+     * 关联的游戏ID列表
+     */
+    private List<String> gameIds;
 
 }

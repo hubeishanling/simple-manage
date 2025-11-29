@@ -8,8 +8,8 @@ import org.shanling.simplemanage.mapper.ScriptConfigMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 脚本配置模板管理服务
@@ -63,7 +63,7 @@ public class ScriptConfigService {
                 .replace("${GAME_ID}", gameId != null ? gameId : "YOUR_GAME_ID_HERE")
                 .replace("${PUBLIC_KEY}", publicKey != null ? publicKey : "")
                 .replace("${PRIVATE_KEY}", privateKey != null ? privateKey : "")
-                .replace("${GENERATE_TIME}", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                .replace("${GENERATE_TIME}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         
         return content;
     }

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -84,8 +84,8 @@ public class ScriptGameService {
         ScriptGame game = new ScriptGame();
         BeanUtils.copyProperties(gameDTO, game);
         
-        game.setCreateTime(LocalDateTime.now());
-        game.setUpdateTime(LocalDateTime.now());
+        game.setCreateTime(new Date());
+        game.setUpdateTime(new Date());
         
         scriptGameMapper.insert(game);
         log.info("游戏添加成功：{}", game.getTitle());
@@ -110,7 +110,7 @@ public class ScriptGameService {
             game.setRemark(gameDTO.getRemark());
         }
         
-        game.setUpdateTime(LocalDateTime.now());
+        game.setUpdateTime(new Date());
         
         scriptGameMapper.updateById(game);
         log.info("游戏更新成功：{}", game.getTitle());
@@ -138,7 +138,7 @@ public class ScriptGameService {
     @Transactional(rollbackFor = Exception.class)
     public void batchDeleteGame(Collection<String> ids) {
         log.info("批量删除游戏：ids={}", ids);
-        scriptGameMapper.deleteBatchIds(ids);
+        scriptGameMapper.deleteByIds(ids);
         log.info("批量删除游戏成功");
     }
 

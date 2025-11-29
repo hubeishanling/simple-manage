@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 脚本卡密实体类
@@ -39,7 +40,7 @@ public class ScriptCard {
     /**
      * 实际过期时间（初始为NULL，第一次绑定时赋值）
      */
-    private LocalDateTime expireTime;
+    private Date expireTime;
 
     /**
      * 可绑定设备数
@@ -59,19 +60,19 @@ public class ScriptCard {
     /**
      * 最后登录时间
      */
-    private LocalDateTime loginDate;
+    private Date loginDate;
 
     /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    private Date createTime;
 
     /**
      * 更新时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+    private Date updateTime;
 
     /**
      * 创建人
@@ -87,5 +88,11 @@ public class ScriptCard {
      * 备注
      */
     private String remark;
+
+    /**
+     * 关联的游戏列表（非数据库字段）
+     */
+    @TableField(exist = false)
+    private List<ScriptCardGame> cardGames;
 
 }

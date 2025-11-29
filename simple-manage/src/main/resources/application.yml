@@ -7,10 +7,27 @@ spring:
   application:
     name: simple-manage
   
+  # Jackson 配置
+  jackson:
+    # Date 类型格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 时区设置
+    time-zone: GMT+8
+    # 序列化配置
+    serialization:
+      # 美化输出
+      indent_output: false
+      # 忽略无法转换的对象
+      fail_on_empty_beans: false
+    # 反序列化配置
+    deserialization:
+      # 忽略未知属性
+      fail_on_unknown_properties: false
+  
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://120.48.127.138:3306/simple-manage?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://120.48.127.138:3306/simple-manage?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false
     username: root
     password: yr134167
     # HikariCP 连接池配置
@@ -21,13 +38,23 @@ spring:
       maximum-pool-size: 20
       # 连接超时时间（毫秒）
       connection-timeout: 30000
-      # 连接最大存活时间（毫秒），必须小于 MySQL 的 wait_timeout（默认 28800 秒 = 8 小时）
-      # 设置为 25 分钟，避免连接被 MySQL 服务器关闭
-      max-lifetime: 1800000
-      # 连接空闲超时时间（毫秒），10 分钟
-      idle-timeout: 600000
-      # 连接测试查询
-      connection-test-query: SELECT 1
+      # 连接最大存活时间（毫秒）- 设置为 10 分钟，远小于 MySQL wait_timeout
+      # MySQL 默认 wait_timeout 为 28800 秒（8小时），但为安全起见设置较短时间
+      max-lifetime: 600000
+      # 连接空闲超时时间（毫秒）- 5 分钟
+      idle-timeout: 300000
+      # 连接测试查询（MySQL 8.0+ 推荐不设置，使用 JDBC4 的 isValid()）
+      # connection-test-query: SELECT 1
+      # 连接池名称
+      pool-name: HikariPool-SimpleManage
+      # 自动提交
+      auto-commit: true
+      # 连接泄漏检测阈值（毫秒）- 超过此时间未归还连接会记录日志
+      leak-detection-threshold: 60000
+      # 验证超时时间（毫秒）
+      validation-timeout: 3000
+      # 保持连接活跃的间隔时间（毫秒）- 每 5 分钟发送一次心跳
+      keepalive-time: 300000
   
   # SQL 初始化配置
   sql:
