@@ -1,144 +1,141 @@
 <template>
-  <div class="home-container">
-    <!-- 欢迎卡片 -->
-    <el-card class="welcome-card" shadow="hover">
-      <div class="welcome-content">
-        <div class="welcome-text">
-          <h2>欢迎回来，{{ userStore.userInfo?.username }}！</h2>
-          <p>今天是 {{ currentDate }}</p>
-        </div>
-        <el-icon class="welcome-icon" :size="80">
-          <TrophyBase />
-        </el-icon>
-      </div>
-    </el-card>
-    
+  <div class="dashboard-container" v-loading="loading">
     <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :xs="24" :sm="12" :md="6">
-        <el-card shadow="hover" class="stat-card stat-card-blue">
+    <el-row :gutter="20" class="stat-cards">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="hover" class="stat-card revenue">
           <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">用户总数</div>
-              <div class="stat-value">1,234</div>
+            <div class="stat-icon">
+              <el-icon :size="48"><Coin /></el-icon>
             </div>
-            <el-icon class="stat-icon" :size="48">
-              <User />
-            </el-icon>
+            <div class="stat-info">
+              <div class="stat-label">总收益</div>
+              <div class="stat-value">¥{{ formatCurrency(stats.totalRevenue) }}</div>
+              <div class="stat-trend">
+                <span class="trend-label">今日新增：</span>
+                <span class="trend-value">¥{{ formatCurrency(stats.todayRevenue) }}</span>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <el-card shadow="hover" class="stat-card stat-card-green">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="hover" class="stat-card cards">
           <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">今日访问</div>
-              <div class="stat-value">567</div>
+            <div class="stat-icon">
+              <el-icon :size="48"><Postcard /></el-icon>
             </div>
-            <el-icon class="stat-icon" :size="48">
-              <View />
-            </el-icon>
+            <div class="stat-info">
+              <div class="stat-label">总卡密数</div>
+              <div class="stat-value">{{ stats.totalCards || 0 }}</div>
+              <div class="stat-trend">
+                <span class="trend-label">今日新增：</span>
+                <span class="trend-value">+{{ stats.todayCards || 0 }}</span>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <el-card shadow="hover" class="stat-card stat-card-orange">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="hover" class="stat-card devices">
           <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">消息通知</div>
-              <div class="stat-value">89</div>
+            <div class="stat-icon">
+              <el-icon :size="48"><Iphone /></el-icon>
             </div>
-            <el-icon class="stat-icon" :size="48">
-              <Bell />
-            </el-icon>
+            <div class="stat-info">
+              <div class="stat-label">总设备数</div>
+              <div class="stat-value">{{ stats.totalDevices || 0 }}</div>
+              <div class="stat-trend">
+                <span class="trend-label">今日新增：</span>
+                <span class="trend-value">+{{ stats.todayDevices || 0 }}</span>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <el-card shadow="hover" class="stat-card stat-card-purple">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="hover" class="stat-card status">
           <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">待办事项</div>
-              <div class="stat-value">12</div>
+            <div class="stat-icon">
+              <el-icon :size="48"><DataAnalysis /></el-icon>
             </div>
-            <el-icon class="stat-icon" :size="48">
-              <Document />
-            </el-icon>
+            <div class="stat-info">
+              <div class="stat-label">卡密状态</div>
+              <div class="stat-value">{{ stats.cardStatusStats?.normalCount || 0 }}</div>
+              <div class="stat-trend">
+                <span class="trend-label">正常</span>
+                <span class="trend-label" style="margin-left: 10px;">停用：{{ stats.cardStatusStats?.disabledCount || 0 }}</span>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
-    
-    <!-- 用户信息卡片 -->
-    <el-row :gutter="20" class="info-row">
-      <el-col :xs="24" :md="12">
+
+    <!-- 图表区域 -->
+    <el-row :gutter="20" class="chart-row">
+      <!-- 收益趋势图表 -->
+      <el-col :xs="24" :sm="24" :lg="12">
         <el-card shadow="hover">
           <template #header>
             <div class="card-header">
-              <span class="card-title">
-                <el-icon><User /></el-icon>
-                用户信息
-              </span>
+              <span class="card-title">近30天收益趋势</span>
             </div>
           </template>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="用户ID">
-              {{ userStore.userInfo?.id }}
-            </el-descriptions-item>
-            <el-descriptions-item label="用户名">
-              {{ userStore.userInfo?.username }}
-            </el-descriptions-item>
-            <el-descriptions-item label="邮箱">
-              {{ userStore.userInfo?.email || '未设置' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="状态">
-              <el-tag :type="userStore.userInfo?.status === 1 ? 'success' : 'danger'">
-                {{ userStore.userInfo?.status === 1 ? '正常' : '禁用' }}
-              </el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="最后登录">
-              {{ formatDateTime(userStore.userInfo?.lastLoginTime) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-              {{ formatDateTime(userStore.userInfo?.createTime) }}
-            </el-descriptions-item>
-          </el-descriptions>
+          <div ref="revenueChartRef" style="height: 300px"></div>
         </el-card>
       </el-col>
-      
-      <el-col :xs="24" :md="12">
+
+      <!-- 卡密新增趋势图表 -->
+      <el-col :xs="24" :sm="24" :lg="12">
         <el-card shadow="hover">
           <template #header>
             <div class="card-header">
-              <span class="card-title">
-                <el-icon><InfoFilled /></el-icon>
-                系统信息
-              </span>
+              <span class="card-title">近7天卡密新增趋势</span>
             </div>
           </template>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="系统名称">
-              简单管理系统
-            </el-descriptions-item>
-            <el-descriptions-item label="系统版本">
-              v1.0.0
-            </el-descriptions-item>
-            <el-descriptions-item label="后端框架">
-              Spring Boot 3.2.0
-            </el-descriptions-item>
-            <el-descriptions-item label="前端框架">
-              Vue 3 + Element Plus
-            </el-descriptions-item>
-            <el-descriptions-item label="认证方式">
-              JWT Token
-            </el-descriptions-item>
-            <el-descriptions-item label="开发者">
-              shanling
-            </el-descriptions-item>
-          </el-descriptions>
+          <div ref="cardTrendChartRef" style="height: 300px"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 游戏统计和设备趋势 -->
+    <el-row :gutter="20" class="chart-row">
+      <!-- 游戏卡密统计图表 -->
+      <el-col :xs="24" :sm="24" :lg="12">
+        <el-card shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">游戏卡密统计</span>
+            </div>
+          </template>
+          <div ref="gameStatsChartRef" style="height: 350px"></div>
+        </el-card>
+      </el-col>
+
+      <!-- 设备趋势和卡密状态 -->
+      <el-col :xs="24" :sm="24" :lg="12">
+        <!-- 设备绑定趋势图表 -->
+        <el-card shadow="hover" style="margin-bottom: 20px;">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">近7天设备绑定趋势</span>
+            </div>
+          </template>
+          <div ref="deviceTrendChartRef" style="height: 150px"></div>
+        </el-card>
+
+        <!-- 卡密状态分布图表 -->
+        <el-card shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">卡密状态分布</span>
+            </div>
+          </template>
+          <div ref="cardStatusChartRef" style="height: 170px"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -146,82 +143,413 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { TrophyBase, User, View, Bell, Document, InfoFilled } from '@element-plus/icons-vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { getDashboardStats, type DashboardStats } from '@/api/dashboard'
+import { ElMessage } from 'element-plus'
+import { Coin, Postcard, Iphone, DataAnalysis } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
 
-const userStore = useUserStore()
-
-const currentDate = computed(() => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-  const weekDay = weekDays[now.getDay()]
-  return `${year}年${month}月${day}日 ${weekDay}`
+const loading = ref(false)
+const stats = ref<DashboardStats>({
+  totalRevenue: 0,
+  todayRevenue: 0,
+  totalCards: 0,
+  todayCards: 0,
+  totalDevices: 0,
+  todayDevices: 0,
+  cardTrend: [],
+  deviceTrend: [],
+  gameStats: [],
+  cardStatusStats: {
+    normalCount: 0,
+    disabledCount: 0,
+    expiredCount: 0,
+    expiringSoonCount: 0
+  },
+  revenueTrend: []
 })
 
-const formatDateTime = (dateTimeStr: string | undefined) => {
-  if (!dateTimeStr) return '暂无'
-  const date = new Date(dateTimeStr)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+// 图表引用
+const revenueChartRef = ref()
+const cardTrendChartRef = ref()
+const deviceTrendChartRef = ref()
+const gameStatsChartRef = ref()
+const cardStatusChartRef = ref()
+
+// 图表实例
+let revenueChart: echarts.ECharts | null = null
+let cardTrendChart: echarts.ECharts | null = null
+let deviceTrendChart: echarts.ECharts | null = null
+let gameStatsChart: echarts.ECharts | null = null
+let cardStatusChart: echarts.ECharts | null = null
+
+// 加载统计数据
+const loadDashboardStats = async () => {
+  loading.value = true
+  try {
+    const res = await getDashboardStats()
+    stats.value = res.data
+    
+    // 延迟初始化图表，确保DOM已渲染
+    nextTick(() => {
+      initCharts()
+    })
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+    ElMessage.error('加载统计数据失败')
+  } finally {
+    loading.value = false
+  }
 }
+
+// 初始化所有图表
+const initCharts = () => {
+  initRevenueChart()
+  initCardTrendChart()
+  initDeviceTrendChart()
+  initGameStatsChart()
+  initCardStatusChart()
+}
+
+// 初始化收益趋势图表
+const initRevenueChart = () => {
+  if (!revenueChartRef.value) return
+  
+  if (revenueChart) {
+    revenueChart.dispose()
+  }
+  
+  revenueChart = echarts.init(revenueChartRef.value)
+  
+  const dates = stats.value.revenueTrend?.map(item => item.date) || []
+  const revenues = stats.value.revenueTrend?.map(item => {
+    const val = typeof item.revenue === 'string' ? parseFloat(item.revenue) : item.revenue
+    return isNaN(val) ? 0 : val
+  }) || []
+  
+  revenueChart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        return `${params[0].name}<br/>收益: ¥${params[0].value.toFixed(2)}`
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      boundaryGap: false
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '¥{value}'
+      }
+    },
+    series: [
+      {
+        name: '收益',
+        type: 'line',
+        smooth: true,
+        data: revenues,
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(255, 193, 7, 0.5)' },
+            { offset: 1, color: 'rgba(255, 193, 7, 0.1)' }
+          ])
+        },
+        lineStyle: {
+          color: '#FFC107'
+        },
+        itemStyle: {
+          color: '#FFC107'
+        }
+      }
+    ]
+  })
+}
+
+// 初始化卡密趋势图表
+const initCardTrendChart = () => {
+  if (!cardTrendChartRef.value) return
+  
+  if (cardTrendChart) {
+    cardTrendChart.dispose()
+  }
+  
+  cardTrendChart = echarts.init(cardTrendChartRef.value)
+  
+  const dates = stats.value.cardTrend?.map(item => item.date) || []
+  const counts = stats.value.cardTrend?.map(item => item.count) || []
+  
+  cardTrendChart.setOption({
+    tooltip: {
+      trigger: 'axis'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name: '新增卡密',
+        type: 'bar',
+        data: counts,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#4CAF50' },
+            { offset: 1, color: '#81C784' }
+          ])
+        }
+      }
+    ]
+  })
+}
+
+// 初始化设备趋势图表
+const initDeviceTrendChart = () => {
+  if (!deviceTrendChartRef.value) return
+  
+  if (deviceTrendChart) {
+    deviceTrendChart.dispose()
+  }
+  
+  deviceTrendChart = echarts.init(deviceTrendChartRef.value)
+  
+  const dates = stats.value.deviceTrend?.map(item => item.date) || []
+  const counts = stats.value.deviceTrend?.map(item => item.count) || []
+  
+  deviceTrendChart.setOption({
+    tooltip: {
+      trigger: 'axis'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name: '新增设备',
+        type: 'line',
+        smooth: true,
+        data: counts,
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(33, 150, 243, 0.5)' },
+            { offset: 1, color: 'rgba(33, 150, 243, 0.1)' }
+          ])
+        },
+        lineStyle: {
+          color: '#2196F3'
+        },
+        itemStyle: {
+          color: '#2196F3'
+        }
+      }
+    ]
+  })
+}
+
+// 初始化游戏统计图表
+const initGameStatsChart = () => {
+  if (!gameStatsChartRef.value) return
+  
+  if (gameStatsChart) {
+    gameStatsChart.dispose()
+  }
+  
+  gameStatsChart = echarts.init(gameStatsChartRef.value)
+  
+  const games = stats.value.gameStats?.map(item => item.gameName) || []
+  const totalCounts = stats.value.gameStats?.map(item => item.cardCount) || []
+  const activeCounts = stats.value.gameStats?.map(item => item.activeCount) || []
+  const inactiveCounts = stats.value.gameStats?.map(item => item.inactiveCount) || []
+  
+  gameStatsChart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    legend: {
+      data: ['总卡密', '已激活', '未激活']
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: games
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name: '总卡密',
+        type: 'bar',
+        data: totalCounts,
+        itemStyle: { color: '#409EFF' }
+      },
+      {
+        name: '已激活',
+        type: 'bar',
+        data: activeCounts,
+        itemStyle: { color: '#67C23A' }
+      },
+      {
+        name: '未激活',
+        type: 'bar',
+        data: inactiveCounts,
+        itemStyle: { color: '#E6A23C' }
+      }
+    ]
+  })
+}
+
+// 初始化卡密状态图表
+const initCardStatusChart = () => {
+  if (!cardStatusChartRef.value) return
+  
+  if (cardStatusChart) {
+    cardStatusChart.dispose()
+  }
+  
+  cardStatusChart = echarts.init(cardStatusChartRef.value)
+  
+  const statsData = stats.value.cardStatusStats
+  
+  cardStatusChart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: '0%',
+      left: 'center'
+    },
+    series: [
+      {
+        name: '卡密状态',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '45%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: '{b}: {c}'
+        },
+        data: [
+          { value: statsData?.normalCount || 0, name: '正常', itemStyle: { color: '#67C23A' } },
+          { value: statsData?.disabledCount || 0, name: '停用', itemStyle: { color: '#909399' } },
+          { value: statsData?.expiredCount || 0, name: '已过期', itemStyle: { color: '#F56C6C' } },
+          { value: statsData?.expiringSoonCount || 0, name: '即将过期', itemStyle: { color: '#E6A23C' } }
+        ]
+      }
+    ]
+  })
+}
+
+// 监听窗口大小变化
+const handleResize = () => {
+  revenueChart?.resize()
+  cardTrendChart?.resize()
+  deviceTrendChart?.resize()
+  gameStatsChart?.resize()
+  cardStatusChart?.resize()
+}
+
+// 格式化货币
+const formatCurrency = (value: any) => {
+  if (value === null || value === undefined) return '0.00'
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(num)) return '0.00'
+  return num.toFixed(2)
+}
+
+onMounted(() => {
+  loadDashboardStats()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  revenueChart?.dispose()
+  cardTrendChart?.dispose()
+  deviceTrendChart?.dispose()
+  gameStatsChart?.dispose()
+  cardStatusChart?.dispose()
+})
 </script>
 
 <style scoped>
-.home-container {
-  max-width: 1400px;
-  margin: 0 auto;
+.dashboard-container {
+  padding: 20px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 120px);
 }
 
-.welcome-card {
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-}
-
-.welcome-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-}
-
-.welcome-text h2 {
-  margin: 0 0 10px 0;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.welcome-text p {
-  margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.welcome-icon {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.stats-row {
+.stat-cards {
   margin-bottom: 20px;
 }
 
 .stat-card {
   margin-bottom: 20px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
 }
 
 .stat-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 20px;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 48px;
 }
 
 .stat-info {
@@ -236,59 +564,92 @@ const formatDateTime = (dateTimeStr: string | undefined) => {
 
 .stat-value {
   font-size: 28px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
-.stat-icon {
-  opacity: 0.3;
+.stat-trend {
+  font-size: 12px;
+  color: #67C23A;
 }
 
-.stat-card-blue .stat-icon {
-  color: #409eff;
+.trend-label {
+  color: #909399;
 }
 
-.stat-card-green .stat-icon {
-  color: #67c23a;
+.trend-value {
+  color: #67C23A;
+  font-weight: 500;
 }
 
-.stat-card-orange .stat-icon {
-  color: #e6a23c;
+.stat-card.revenue .stat-icon {
+  background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
+  color: #fff;
 }
 
-.stat-card-purple .stat-icon {
-  color: #9c27b0;
+.stat-card.revenue .stat-value {
+  color: #FFC107;
 }
 
-.info-row {
+.stat-card.cards .stat-icon {
+  background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+  color: #fff;
+}
+
+.stat-card.cards .stat-value {
+  color: #4CAF50;
+}
+
+.stat-card.devices .stat-icon {
+  background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+  color: #fff;
+}
+
+.stat-card.devices .stat-value {
+  color: #2196F3;
+}
+
+.stat-card.status .stat-icon {
+  background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
+  color: #fff;
+}
+
+.stat-card.status .stat-value {
+  color: #9C27B0;
+}
+
+.chart-row {
   margin-bottom: 20px;
 }
 
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: bold;
+  color: #303133;
+}
+
+:deep(.el-card) {
+  border-radius: 8px;
+}
+
+:deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid #EBEEF5;
 }
 
 :deep(.el-card__body) {
   padding: 20px;
 }
 
-:deep(.el-descriptions__label) {
-  width: 120px;
-}
-
 @media (max-width: 768px) {
-  .welcome-icon {
-    display: none;
+  .dashboard-container {
+    padding: 10px;
   }
   
   .stat-icon {

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.shanling.simplemanage.mapper.DashboardMapper">
+
+    <!-- 查询总收益 -->
+    <select id="selectTotalRevenue" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(price), 0)
+        FROM script_card
+    </select>
+
+    <!-- 查询今日新增收益 -->
+    <select id="selectTodayRevenue" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(price), 0)
+        FROM script_card
+        WHERE DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 查询总卡密数 -->
+    <select id="selectTotalCards" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM script_card
+    </select>
+
+    <!-- 查询今日新增卡密数 -->
+    <select id="selectTodayCards" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM script_card
+        WHERE DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 查询总设备数 -->
+    <select id="selectTotalDevices" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT device_android_id)
+        FROM script_card_device
+    </select>
+
+    <!-- 查询今日新增设备数 -->
+    <select id="selectTodayDevices" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT device_android_id)
+        FROM script_card_device
+        WHERE DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 查询近N天卡密新增趋势 -->
+    <select id="selectCardTrend" resultType="org.shanling.simplemanage.vo.DailyCardTrendVO">
+        SELECT
+            DATE(create_time) as date,
+            COUNT(*) as count
+        FROM script_card
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
+    <!-- 查询近N天设备绑定趋势 -->
+    <select id="selectDeviceTrend" resultType="org.shanling.simplemanage.vo.DailyDeviceTrendVO">
+        SELECT
+            DATE(create_time) as date,
+            COUNT(DISTINCT device_android_id) as count
+        FROM script_card_device
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
+    <!-- 查询每个游戏下的卡密统计 -->
+    <select id="selectGameCardStats" resultType="org.shanling.simplemanage.vo.GameCardStatsVO">
+        SELECT
+            g.id as gameId,
+            g.title as gameName,
+            COUNT(DISTINCT cg.card_id) as cardCount,
+            COUNT(DISTINCT CASE WHEN cd.device_android_id IS NOT NULL THEN c.card_no END) as activeCount,
+            COUNT(DISTINCT CASE WHEN cd.device_android_id IS NULL THEN cg.card_id END) as inactiveCount
+        FROM script_game g
+        LEFT JOIN script_card_game cg ON g.id = cg.game_id
+        LEFT JOIN script_card c ON cg.card_id = c.id
+        LEFT JOIN script_card_device cd ON c.card_no = cd.card_no
+        GROUP BY g.id, g.title
+        ORDER BY cardCount DESC
+    </select>
+
+    <!-- 查询卡密状态统计 -->
+    <select id="selectCardStatusStats" resultType="org.shanling.simplemanage.vo.CardStatusStatsVO">
+        SELECT
+            SUM(CASE WHEN status = 1 AND (expire_time IS NULL OR expire_time > NOW()) THEN 1 ELSE 0 END) as normalCount,
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as disabledCount,
+            SUM(CASE WHEN expire_time IS NOT NULL AND expire_time &lt;= NOW() THEN 1 ELSE 0 END) as expiredCount,
+            SUM(CASE WHEN expire_time IS NOT NULL AND expire_time > NOW() AND expire_time &lt;= DATE_ADD(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as expiringSoonCount
+        FROM script_card
+    </select>
+
+    <!-- 查询近N天收益趋势 -->
+    <select id="selectRevenueTrend" resultType="org.shanling.simplemanage.vo.DailyRevenueTrendVO">
+        SELECT
+            DATE(create_time) as date,
+            COALESCE(SUM(price), 0) as revenue
+        FROM script_card
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
+</mapper>
