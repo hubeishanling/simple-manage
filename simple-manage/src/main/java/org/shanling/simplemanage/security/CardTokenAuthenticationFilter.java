@@ -17,7 +17,8 @@ import java.util.Collections;
 
 /**
  * 卡密Token认证过滤器
- * 专门用于处理 /open-api/** 接口的卡密token认证
+ * 用于脚本端独立认证系统（通过 SecurityFilterChain 隔离）
+ * 仅在 /open-api/script/** 路径下生效
  * 
  * @author shanling
  */
@@ -35,38 +36,30 @@ public class CardTokenAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String requestUri = request.getRequestURI();
+        try {
+            // 获取token（支持两种格式）
+            String cardToken = getCardToken(request);
 
-        // 只处理 /open-api/script/** 路径（排除login和checkUser）
-        if (requestUri.startsWith("/open-api/script/") 
-                && !requestUri.equals("/open-api/script/login")
-                && !requestUri.equals("/open-api/script/checkUser")) {
+            if (cardToken != null && jwtUtil.validateToken(cardToken)) {
+                // 从token中获取用户名（格式：card:卡号）
+                String username = jwtUtil.getUsernameFromToken(cardToken);
 
-            try {
-                // 获取token（支持两种格式）
-                String cardToken = getCardToken(request);
+                if (username != null && username.startsWith("card:")) {
+                    // 创建认证对象（不需要角色，独立认证系统）
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            Collections.emptyList()
+                    );
 
-                if (cardToken != null && jwtUtil.validateToken(cardToken)) {
-                    // 从token中获取用户名（格式：card:卡号）
-                    String username = jwtUtil.getUsernameFromToken(cardToken);
-
-                    if (username != null && username.startsWith("card:")) {
-                        // 创建认证对象
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
-                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CARD_USER"))
-                        );
-
-                        // 设置到Security上下文
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.debug("卡密token验证通过：{}", username);
-                    }
+                    // 设置到Security上下文
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("卡密token验证通过：{}", username);
                 }
-            } catch (Exception e) {
-                log.warn("卡密token验证失败：{}", e.getMessage());
-                // 不阻止请求继续，让Controller层处理
             }
+        } catch (Exception e) {
+            log.warn("卡密token验证失败：{}", e.getMessage());
+            // 不阻止请求继续，让Spring Security处理未认证的情况
         }
 
         filterChain.doFilter(request, response);

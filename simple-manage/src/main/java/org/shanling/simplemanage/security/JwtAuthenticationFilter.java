@@ -19,6 +19,8 @@ import java.io.IOException;
 
 /**
  * JWT 认证过滤器
+ * 用于管理端独立认证系统（通过 SecurityFilterChain 隔离）
+ * 处理除脚本端外的所有路径
  * 
  * @author shanling
  */
