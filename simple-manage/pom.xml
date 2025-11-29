@@ -102,6 +102,20 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Hutool Core for encryption utilities -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>5.8.25</version>
+        </dependency>
+
+        <!-- Hutool Crypto for RSA/AES encryption -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+            <version>5.8.25</version>
+        </dependency>
     </dependencies>
 
     <build>

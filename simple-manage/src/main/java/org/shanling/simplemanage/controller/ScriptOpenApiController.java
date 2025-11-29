@@ -3,6 +3,7 @@ package org.shanling.simplemanage.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.shanling.simplemanage.common.Result;
+import org.shanling.simplemanage.config.encrypt.ApiEncrypt;
 import org.shanling.simplemanage.dto.CardLoginDTO;
 import org.shanling.simplemanage.entity.ScriptVersionControl;
 import org.shanling.simplemanage.service.ScriptCardAuthService;
@@ -44,8 +45,11 @@ public class ScriptOpenApiController {
 
     /**
      * 卡密登录
+     * 注意：启用加密后，需要前端使用 RSA+AES 加密请求和响应数据
+     * 详细说明请参考 ENCRYPTION_GUIDE.md
      */
     @PostMapping("/login")
+    @ApiEncrypt(response = true)  // 启用请求和响应加密
     public Result<CardLoginVO> cardLogin(@Valid @RequestBody CardLoginDTO loginDTO) {
         try {
             CardLoginVO loginVO = cardAuthService.cardLogin(loginDTO);
