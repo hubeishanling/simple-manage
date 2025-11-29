@@ -33,6 +33,14 @@ spring:
   sql:
     init:
       mode: never  # 使用代码方式初始化数据，不自动执行 SQL 文件
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      # 最大文件大小
+      max-file-size: 5MB
+      # 最大请求大小
+      max-request-size: 10MB
 
 # MyBatis-Plus 配置
 mybatis-plus:
@@ -62,3 +70,13 @@ jwt:
   token-prefix: "Bearer "
   # Token 请求头名称
   header: Authorization
+
+# 文件上传配置
+file:
+  upload:
+    # 本地文件存储路径
+    path: D:/uploads/scripts
+    # 文件访问URL前缀
+    url-prefix: http://localhost:8080/api/files/scripts
+    # 最大文件大小（5MB）
+    max-size: 5242880

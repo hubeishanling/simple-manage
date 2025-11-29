@@ -1,0 +1,27 @@
+-- 卡密关联设备表
+CREATE TABLE IF NOT EXISTS `script_card_device` (
+    `id` VARCHAR(20) NOT NULL COMMENT '设备ID（雪花算法生成）',
+    `card_no` VARCHAR(50) NOT NULL COMMENT '卡密',
+    `device_android_id` VARCHAR(100) NOT NULL COMMENT '设备的Android ID',
+    `device_width` INT(11) DEFAULT NULL COMMENT '屏幕宽度',
+    `device_height` INT(11) DEFAULT NULL COMMENT '屏幕高度',
+    `device_brand` VARCHAR(50) DEFAULT NULL COMMENT '厂商品牌',
+    `device_name` VARCHAR(100) DEFAULT NULL COMMENT '设备名称',
+    `device_model` VARCHAR(100) DEFAULT NULL COMMENT '设备型号',
+    `device_sdk_int` VARCHAR(20) DEFAULT NULL COMMENT 'API版本',
+    `device_imei` VARCHAR(100) DEFAULT NULL COMMENT '设备IMEI',
+    `device_broad` VARCHAR(100) DEFAULT NULL COMMENT '主板型号',
+    `device_build_id` VARCHAR(100) DEFAULT NULL COMMENT '版本号',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_by` VARCHAR(50) DEFAULT NULL COMMENT '创建人',
+    `update_by` VARCHAR(50) DEFAULT NULL COMMENT '更新人',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_card_device` (`card_no`, `device_android_id`),
+    KEY `idx_card_no` (`card_no`),
+    KEY `idx_device_id` (`device_android_id`),
+    KEY `idx_device_brand` (`device_brand`),
+    KEY `idx_device_model` (`device_model`),
+    KEY `idx_create_time` (`create_time`)
+) COMMENT='卡密关联设备表';

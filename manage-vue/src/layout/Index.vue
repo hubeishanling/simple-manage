@@ -19,6 +19,33 @@
           <template #title>首页</template>
         </el-menu-item>
         
+        <el-sub-menu index="script">
+          <template #title>
+            <el-icon><Tickets /></el-icon>
+            <span>脚本管理</span>
+          </template>
+          <el-menu-item index="/script/game">
+            <el-icon><Grid /></el-icon>
+            <template #title>游戏管理</template>
+          </el-menu-item>
+          <el-menu-item index="/script/version">
+            <el-icon><Files /></el-icon>
+            <template #title>版本控制</template>
+          </el-menu-item>
+          <el-menu-item index="/script/rsakey">
+            <el-icon><Key /></el-icon>
+            <template #title>RSA密钥</template>
+          </el-menu-item>
+          <el-menu-item index="/script/card">
+            <el-icon><CreditCard /></el-icon>
+            <template #title>卡密管理</template>
+          </el-menu-item>
+          <el-menu-item index="/script/device">
+            <el-icon><Cellphone /></el-icon>
+            <template #title>设备管理</template>
+          </el-menu-item>
+        </el-sub-menu>
+        
         <el-sub-menu index="system">
           <template #title>
             <el-icon><Setting /></el-icon>
@@ -84,7 +111,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { 
   Management, HomeFilled, Setting, User, UserFilled, 
-  ArrowDown, SwitchButton, Fold, Expand 
+  ArrowDown, SwitchButton, Fold, Expand, Tickets, CreditCard, Cellphone, Grid, Files, Key
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 

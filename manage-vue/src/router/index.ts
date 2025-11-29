@@ -25,6 +25,36 @@ const routes: RouteRecordRaw[] = [
         name: 'SystemUser',
         component: () => import('@/views/system/User.vue'),
         meta: { title: '用户管理' }
+      },
+      {
+        path: '/script/card',
+        name: 'ScriptCard',
+        component: () => import('@/views/script/Card.vue'),
+        meta: { title: '卡密管理' }
+      },
+      {
+        path: '/script/device',
+        name: 'ScriptDevice',
+        component: () => import('@/views/script/Device.vue'),
+        meta: { title: '设备管理' }
+      },
+      {
+        path: '/script/game',
+        name: 'ScriptGame',
+        component: () => import('@/views/script/Game.vue'),
+        meta: { title: '游戏管理' }
+      },
+      {
+        path: '/script/version',
+        name: 'ScriptVersion',
+        component: () => import('@/views/script/Version.vue'),
+        meta: { title: '版本控制' }
+      },
+      {
+        path: '/script/rsakey',
+        name: 'ScriptRsaKey',
+        component: () => import('@/views/script/RsaKey.vue'),
+        meta: { title: 'RSA密钥' }
       }
     ]
   },
