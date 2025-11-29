@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <!-- 配置属性 -->
+    <Properties>
+        <!-- 日志文件路径 -->
+        <Property name="LOG_HOME">./logs</Property>
+        <!-- 应用名称 -->
+        <Property name="APP_NAME">simple-manage</Property>
+        <!-- 日志输出格式 -->
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <!-- 控制台日志输出格式（带颜色） -->
+        <Property name="CONSOLE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level}{ERROR=red, WARN=yellow, INFO=green, DEBUG=blue} [%t] %style{%logger{36}}{cyan} - %msg%n</Property>
+    </Properties>
+
+    <!-- 日志输出器 -->
+    <Appenders>
+        <!-- 控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_LOG_PATTERN}"/>
+            <!-- 只输出 INFO 及以上级别的日志 -->
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!-- 所有日志文件 - 每天生成一个文件 -->
+        <RollingFile name="AllFile" fileName="${LOG_HOME}/${APP_NAME}.log"
+                     filePattern="${LOG_HOME}/${APP_NAME}-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!-- 每天凌晨 0 点生成新文件 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- 单个文件最大 100MB -->
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <!-- 保留最近 30 天的日志 -->
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="${APP_NAME}-*.log"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- INFO 级别日志文件 -->
+        <RollingFile name="InfoFile" fileName="${LOG_HOME}/info.log"
+                     filePattern="${LOG_HOME}/info-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <!-- 只输出 INFO 级别 -->
+                <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="info-*.log"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- WARN 级别日志文件 -->
+        <RollingFile name="WarnFile" fileName="${LOG_HOME}/warn.log"
+                     filePattern="${LOG_HOME}/warn-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="warn-*.log"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- ERROR 级别日志文件 -->
+        <RollingFile name="ErrorFile" fileName="${LOG_HOME}/error.log"
+                     filePattern="${LOG_HOME}/error-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="error-*.log"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <!-- 日志记录器 -->
+    <Loggers>
+        <!-- Spring Boot 框架日志 -->
+        <Logger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AllFile"/>
+        </Logger>
+
+        <!-- MyBatis 日志 -->
+        <Logger name="com.baomidou.mybatisplus" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AllFile"/>
+        </Logger>
+
+        <!-- 应用日志 -->
+        <Logger name="org.shanling.simplemanage" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AllFile"/>
+            <AppenderRef ref="InfoFile"/>
+            <AppenderRef ref="WarnFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Logger>
+
+        <!-- 根日志记录器 -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AllFile"/>
+            <AppenderRef ref="InfoFile"/>
+            <AppenderRef ref="WarnFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

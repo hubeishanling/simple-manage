@@ -1,0 +1,64 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: simple-manage
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://120.48.127.138:3306/simple-manage?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: yr134167
+    # HikariCP 连接池配置
+    hikari:
+      # 连接池最小空闲连接数
+      minimum-idle: 5
+      # 连接池最大连接数
+      maximum-pool-size: 20
+      # 连接超时时间（毫秒）
+      connection-timeout: 30000
+      # 连接最大存活时间（毫秒），必须小于 MySQL 的 wait_timeout（默认 28800 秒 = 8 小时）
+      # 设置为 25 分钟，避免连接被 MySQL 服务器关闭
+      max-lifetime: 1800000
+      # 连接空闲超时时间（毫秒），10 分钟
+      idle-timeout: 600000
+      # 连接测试查询
+      connection-test-query: SELECT 1
+  
+  # SQL 初始化配置
+  sql:
+    init:
+      mode: never  # 使用代码方式初始化数据，不自动执行 SQL 文件
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 驼峰命名转换
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 主键类型（雪花算法）
+      id-type: assign_id
+      # 逻辑删除字段（已移除）
+      # logic-delete-field: deleted
+      # logic-delete-value: 1
+      # logic-not-delete-value: 0
+  # Mapper XML 文件位置（如果需要自定义 SQL）
+  mapper-locations: classpath*:mapper/**/*.xml
+
+# JWT 配置
+jwt:
+  # 密钥（至少 256 位）
+  secret: simple-manage-secret-key-2024-must-be-at-least-256-bits-long-for-hs256
+  # Token 有效期（毫秒），7 天
+  expiration: 604800000
+  # Token 前缀
+  token-prefix: "Bearer "
+  # Token 请求头名称
+  header: Authorization
